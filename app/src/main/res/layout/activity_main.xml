@@ -21,9 +21,7 @@
             android:dividerHeight = "1dp"
             android:footerDividersEnabled = "false"
             android:headerDividersEnabled = "false">
-
         </ListView>
-
 
     </LinearLayout>
 

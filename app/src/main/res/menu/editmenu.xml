@@ -4,12 +4,12 @@
 
 
     <item
-        android:id="@+id/edit"
+        android:id="@+id/editButton"
         android:title="Edit Reminder"
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/delete"
+        android:id="@+id/deleteButton"
         android:title="Delete Reminder"
         app:showAsAction="never">
 

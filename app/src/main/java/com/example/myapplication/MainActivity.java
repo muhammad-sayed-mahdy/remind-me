@@ -1,11 +1,8 @@
 package com.example.myapplication;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.view.ContextMenu;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -22,22 +19,17 @@ import android.widget.ImageView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.MenuInflater;
 import android.view.View;
-
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-
 import android.widget.Toast;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
@@ -60,8 +52,8 @@ public class MainActivity<StableArrayAdapter> extends AppCompatActivity {
             "Japan"
     };
 
-    // Array of integers points to images stored in /res/drawable-ldpi/
-    int[] importants = new int[]{
+    // Array of images ( red important sign)
+    int[] importatSigns = new int[]{
             R.drawable.red,
             R.drawable.red,
             R.drawable.red,
@@ -82,30 +74,24 @@ public class MainActivity<StableArrayAdapter> extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-            // Each row in the list stores country name, currency and flag
-            List<HashMap<String,String>> aList = new ArrayList<HashMap<String,String>>();
+        List<HashMap<String,String>> aList = new ArrayList<HashMap<String,String>>();
 
-            for(int i=0;i<10;i++){
-                HashMap<String, String> hm = new HashMap<String,String>();
-                hm.put("remindertext", remindersTexts[i]);
-                hm.put("important", Integer.toString(importants[i]) );
-                aList.add(hm);
-            }
+        for(int i=0;i<10;i++){
+            HashMap<String, String> hm = new HashMap<String,String>();
+            hm.put("remindertext", remindersTexts[i]);
+            hm.put("importatSigns", Integer.toString(importatSigns[i]) );
+            aList.add(hm);
+        }
+        String[] RemindersList = { "importatSigns","remindertext" };
 
-            // Keys used in Hashmap
-            String[] from = { "important","remindertext" };
+        int[] to = { R.id.importantSign,R.id.remindertext};
 
-            // Ids of views in listview_layout
-            int[] to = { R.id.important,R.id.remindertext};
+        SimpleAdapter adapter = new SimpleAdapter(getBaseContext(), aList, R.layout.activity_listview, RemindersList, to);
 
-              SimpleAdapter adapter = new SimpleAdapter(getBaseContext(), aList, R.layout.activity_listview, from, to);
-
-            // Getting a reference to listview of main.xml layout file
-            ListView listView = ( ListView ) findViewById(R.id.reminders_list);
-            listView.setAdapter(adapter);
+        ListView listView = ( ListView ) findViewById(R.id.reminders_list);
+        listView.setAdapter(adapter);
 
         registerForContextMenu(listView);
-
     }
 
 
@@ -122,18 +108,18 @@ public class MainActivity<StableArrayAdapter> extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.item1:
+            case R.id.newReminderButton:
                 LayoutInflater inflater = getLayoutInflater();
                 View alertLayout = inflater.inflate(R.layout.alertdialoge, null);
-                final EditText newreminder = alertLayout.findViewById(R.id.newreminder);
-                final CheckBox important = alertLayout.findViewById(R.id.important);
+                final EditText newreminder = alertLayout.findViewById(R.id.editReminder);
+                final CheckBox important = alertLayout.findViewById(R.id.importantCheckBox);
 
                 important.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                         if (isChecked) {
-                            ImageView img=(ImageView)findViewById(R.id.important);
+                            ImageView img=(ImageView)findViewById(R.id.importantSign);
                             img.setVisibility(View.VISIBLE);
                              }
                     }
@@ -141,9 +127,7 @@ public class MainActivity<StableArrayAdapter> extends AppCompatActivity {
 
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
                 alert.setTitle("New Reminder");
-                // this is set the view from XML inside AlertDialog
                 alert.setView(alertLayout);
-                // disallow cancel of AlertDialog on click of back button and outside touch
                 alert.setCancelable(false);
                 alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
@@ -154,17 +138,19 @@ public class MainActivity<StableArrayAdapter> extends AppCompatActivity {
                 alert.setPositiveButton("Commit", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String user = newreminder.getText().toString();
-                        Toast.makeText(getBaseContext(), "Username: " + user, Toast.LENGTH_SHORT).show();
+                        //We will write code here
+
                     }
                 });
                 AlertDialog dialog = alert.create();
                 dialog.show();
                 return true;
-            case R.id.item2:
+
+            case R.id.ExitButton:
                 finish();
                 System.exit(0);
                 return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -181,11 +167,11 @@ public class MainActivity<StableArrayAdapter> extends AppCompatActivity {
     }
     @Override
     public boolean onContextItemSelected(MenuItem itemm){
-        if(itemm.getItemId()==R.id.edit){
+        if(itemm.getItemId()==R.id.editButton){
             LayoutInflater inflater = getLayoutInflater();
             View alertLayout = inflater.inflate(R.layout.alertdialoge, null);
-            final EditText editreminder = alertLayout.findViewById(R.id.newreminder);
-            final CheckBox important = alertLayout.findViewById(R.id.important);
+            final EditText editreminder = alertLayout.findViewById(R.id.editReminder);
+            final CheckBox important = alertLayout.findViewById(R.id.importantCheckBox);
 
 
 
@@ -198,7 +184,7 @@ public class MainActivity<StableArrayAdapter> extends AppCompatActivity {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked) {
-                        ImageView img=(ImageView)findViewById(R.id.important);
+                        ImageView img=(ImageView)findViewById(R.id.importantSign);
                         img.setVisibility(View.VISIBLE);
                     }
                 }
@@ -219,15 +205,14 @@ public class MainActivity<StableArrayAdapter> extends AppCompatActivity {
             alert.setPositiveButton("Commit", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    String user = editreminder.getText().toString();
-                    Toast.makeText(getBaseContext(), "Username: " + user, Toast.LENGTH_SHORT).show();
+                    // wewill write code here
                 }
             });
             AlertDialog dialog = alert.create();
             dialog.show();
             return true;
         }
-        else if(itemm.getItemId()==R.id.delete){
+        else if(itemm.getItemId()==R.id.deleteButton){
             Toast.makeText(getApplicationContext(),"sending sms code",Toast.LENGTH_LONG).show();
         }else{
             return false;
