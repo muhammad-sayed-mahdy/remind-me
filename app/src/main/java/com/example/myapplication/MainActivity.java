@@ -1,10 +1,23 @@
 package com.example.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.text.method.PasswordTransformationMethod;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import android.annotation.SuppressLint;
@@ -31,6 +44,9 @@ public class MainActivity<StableArrayAdapter> extends AppCompatActivity {
     String[] mobileArray = {"Android","IPhone","WindowsMobile","Blackberry",
             "WebOS","Ubuntu","Windows7","Max OS X"};
 
+    final Context context = this;
+    private Button button;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,22 +70,52 @@ public class MainActivity<StableArrayAdapter> extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.item1:
+                LayoutInflater inflater = getLayoutInflater();
+                View alertLayout = inflater.inflate(R.layout.alertdialoge, null);
+                final EditText newreminder = alertLayout.findViewById(R.id.newreminder);
+                final CheckBox important = alertLayout.findViewById(R.id.important);
 
+                important.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if (isChecked) {
+                            newreminder.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                        }
+                    }
+                });
+
+                AlertDialog.Builder alert = new AlertDialog.Builder(this);
+                alert.setTitle("Info");
+                // this is set the view from XML inside AlertDialog
+                alert.setView(alertLayout);
+                // disallow cancel of AlertDialog on click of back button and outside touch
+                alert.setCancelable(false);
+                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Toast.makeText(getBaseContext(), "Cancel clicked", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                alert.setPositiveButton("Commit", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String user = newreminder.getText().toString();
+                        Toast.makeText(getBaseContext(), "Username: " + user , Toast.LENGTH_SHORT).show();
+                    }
+                });
+                AlertDialog dialog = alert.create();
+                dialog.show();
+                return true;
             case R.id.item2:
-                Toast.makeText(this, "Item 2 selected", Toast.LENGTH_SHORT).show();
-                return true;
-            case R.id.item3:
                 Toast.makeText(this, "Item 3 selected", Toast.LENGTH_SHORT).show();
-                return true;
-            case R.id.subitem1:
-                Toast.makeText(this, "Sub Item 1 selected", Toast.LENGTH_SHORT).show();
-                return true;
-            case R.id.subitem2:
-                Toast.makeText(this, "Sub Item 2 selected", Toast.LENGTH_SHORT).show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
+
 }
 
