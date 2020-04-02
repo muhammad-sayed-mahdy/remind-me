@@ -19,6 +19,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,6 +35,8 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import android.os.Bundle;
 import android.app.Activity;
@@ -43,8 +46,33 @@ import android.widget.ListView;
 
 public class MainActivity<StableArrayAdapter> extends AppCompatActivity {
 
-    String[] mobileArray = {"Android","IPhone","WindowsMobile","Blackberry",
-            "WebOS","Ubuntu","Windows7","Max OS X"};
+
+    String[] remindersTexts = new String[] {
+            "India",
+            "Pakistan",
+            "Sri Lanka",
+            "China",
+            "Bangladesh",
+            "Nepal",
+            "Afghanistan",
+            "North Korea",
+            "South Korea",
+            "Japan"
+    };
+
+    // Array of integers points to images stored in /res/drawable-ldpi/
+    int[] importants = new int[]{
+            R.drawable.red,
+            R.drawable.red,
+            R.drawable.red,
+            R.drawable.red,
+            R.drawable.red,
+            R.drawable.red,
+            R.drawable.red,
+            R.drawable.red,
+            R.drawable.red,
+            R.drawable.red
+    };
 
     final Context context = this;
     private Button button;
@@ -54,14 +82,28 @@ public class MainActivity<StableArrayAdapter> extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+            // Each row in the list stores country name, currency and flag
+            List<HashMap<String,String>> aList = new ArrayList<HashMap<String,String>>();
 
+            for(int i=0;i<10;i++){
+                HashMap<String, String> hm = new HashMap<String,String>();
+                hm.put("remindertext", remindersTexts[i]);
+                hm.put("important", Integer.toString(importants[i]) );
+                aList.add(hm);
+            }
 
-        // list of reminders
-        ArrayAdapter adapter = new ArrayAdapter<String>(this,
-                R.layout.activity_listview, mobileArray);
+            // Keys used in Hashmap
+            String[] from = { "important","remindertext" };
 
-        ListView listView = (ListView) findViewById(R.id.reminders_list);
-        listView.setAdapter(adapter);
+            // Ids of views in listview_layout
+            int[] to = { R.id.important,R.id.remindertext};
+
+              SimpleAdapter adapter = new SimpleAdapter(getBaseContext(), aList, R.layout.activity_listview, from, to);
+
+            // Getting a reference to listview of main.xml layout file
+            ListView listView = ( ListView ) findViewById(R.id.reminders_list);
+            listView.setAdapter(adapter);
+
         registerForContextMenu(listView);
 
     }
@@ -91,8 +133,9 @@ public class MainActivity<StableArrayAdapter> extends AppCompatActivity {
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                         if (isChecked) {
-                            //newreminder.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                        }
+                            ImageView img=(ImageView)findViewById(R.id.important);
+                            img.setVisibility(View.VISIBLE);
+                             }
                     }
                 });
 
@@ -146,7 +189,7 @@ public class MainActivity<StableArrayAdapter> extends AppCompatActivity {
 
 
 
-            TextView txt_hello = (TextView) findViewById(R.id.label);
+            TextView txt_hello = (TextView) findViewById(R.id.remindertext);
             String reminderr = txt_hello.getText().toString();
             editreminder.setText(reminderr);
 
@@ -155,7 +198,8 @@ public class MainActivity<StableArrayAdapter> extends AppCompatActivity {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked) {
-                        editreminder.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                        ImageView img=(ImageView)findViewById(R.id.important);
+                        img.setVisibility(View.VISIBLE);
                     }
                 }
             });
