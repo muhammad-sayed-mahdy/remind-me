@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.view.ContextMenu;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -52,13 +54,21 @@ public class MainActivity<StableArrayAdapter> extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+
+        // list of reminders
         ArrayAdapter adapter = new ArrayAdapter<String>(this,
                 R.layout.activity_listview, mobileArray);
 
-        ListView listView = (ListView) findViewById(R.id.mobile_list);
+        ListView listView = (ListView) findViewById(R.id.reminders_list);
         listView.setAdapter(adapter);
+        registerForContextMenu(listView);
 
     }
+
+
+
+    //Menu of alert dialoge new reminder and exit
     @SuppressLint("ResourceType")
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -81,13 +91,13 @@ public class MainActivity<StableArrayAdapter> extends AppCompatActivity {
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                         if (isChecked) {
-                            newreminder.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                            //newreminder.setTransformationMethod(PasswordTransformationMethod.getInstance());
                         }
                     }
                 });
 
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setTitle("Info");
+                alert.setTitle("New Reminder");
                 // this is set the view from XML inside AlertDialog
                 alert.setView(alertLayout);
                 // disallow cancel of AlertDialog on click of back button and outside touch
@@ -95,7 +105,6 @@ public class MainActivity<StableArrayAdapter> extends AppCompatActivity {
                 alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Toast.makeText(getBaseContext(), "Cancel clicked", Toast.LENGTH_SHORT).show();
                     }
                 });
 
@@ -103,18 +112,83 @@ public class MainActivity<StableArrayAdapter> extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String user = newreminder.getText().toString();
-                        Toast.makeText(getBaseContext(), "Username: " + user , Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getBaseContext(), "Username: " + user, Toast.LENGTH_SHORT).show();
                     }
                 });
                 AlertDialog dialog = alert.create();
                 dialog.show();
                 return true;
             case R.id.item2:
-                Toast.makeText(this, "Item 3 selected", Toast.LENGTH_SHORT).show();
+                finish();
+                System.exit(0);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+
+    //When click on reminder text meu of edit reminder and delete reminder
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo)
+    {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.editmenu, menu);
+    }
+    @Override
+    public boolean onContextItemSelected(MenuItem itemm){
+        if(itemm.getItemId()==R.id.edit){
+            LayoutInflater inflater = getLayoutInflater();
+            View alertLayout = inflater.inflate(R.layout.alertdialoge, null);
+            final EditText editreminder = alertLayout.findViewById(R.id.newreminder);
+            final CheckBox important = alertLayout.findViewById(R.id.important);
+
+
+
+            TextView txt_hello = (TextView) findViewById(R.id.label);
+            String reminderr = txt_hello.getText().toString();
+            editreminder.setText(reminderr);
+
+
+            important.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked) {
+                        editreminder.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                    }
+                }
+            });
+
+            AlertDialog.Builder alert = new AlertDialog.Builder(this);
+            alert.setTitle("Edit Reminder");
+            // this is set the view from XML inside AlertDialog
+            alert.setView(alertLayout);
+            // disallow cancel of AlertDialog on click of back button and outside touch
+            alert.setCancelable(false);
+            alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+
+            alert.setPositiveButton("Commit", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    String user = editreminder.getText().toString();
+                    Toast.makeText(getBaseContext(), "Username: " + user, Toast.LENGTH_SHORT).show();
+                }
+            });
+            AlertDialog dialog = alert.create();
+            dialog.show();
+            return true;
+        }
+        else if(itemm.getItemId()==R.id.delete){
+            Toast.makeText(getApplicationContext(),"sending sms code",Toast.LENGTH_LONG).show();
+        }else{
+            return false;
+        }
+        return true;
     }
 
 }
