@@ -1,102 +1,57 @@
 package com.example.myapplication;
-import androidx.appcompat.app.AppCompatActivity;
+
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.Dialog;
-import android.view.ContextMenu;
-import android.content.Context;
 import android.content.DialogInterface;
+import android.database.Cursor;
 import android.os.Bundle;
-import android.text.method.PasswordTransformationMethod;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.SimpleAdapter;
-import android.widget.TextView;
-import android.widget.Toast;
-import android.annotation.SuppressLint;
-import android.os.Bundle;
-import android.view.MenuInflater;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListAdapter;
+import android.widget.CheckBox;
+import android.widget.CursorAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import android.os.Bundle;
-import android.app.Activity;
-import android.view.Menu;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
-public class MainActivity<StableArrayAdapter> extends AppCompatActivity {
+import androidx.appcompat.app.AppCompatActivity;
+
+public class MainActivity extends AppCompatActivity {
 
 
-    String[] remindersTexts = new String[] {
-            "India",
-            "Pakistan",
-            "Sri Lanka",
-            "China",
-            "Bangladesh",
-            "Nepal",
-            "Afghanistan",
-            "North Korea",
-            "South Korea",
-            "Japan"
-    };
-
-    // Array of images ( red important sign)
-    int[] importatSigns = new int[]{
-            R.drawable.red,
-            R.drawable.red,
-            R.drawable.red,
-            R.drawable.red,
-            R.drawable.red,
-            R.drawable.red,
-            R.drawable.red,
-            R.drawable.red,
-            R.drawable.red,
-            R.drawable.red
-    };
-
-    final Context context = this;
-    private Button button;
+    private RemindersDbAdapter dbAdapter;
+    private RemindersSimpleCursorAdapter cursorAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        List<HashMap<String,String>> aList = new ArrayList<HashMap<String,String>>();
-
-        for(int i=0;i<10;i++){
-            HashMap<String, String> hm = new HashMap<String,String>();
-            hm.put("remindertext", remindersTexts[i]);
-            hm.put("importatSigns", Integer.toString(importatSigns[i]) );
-            aList.add(hm);
-        }
-        String[] RemindersList = { "importatSigns","remindertext" };
-
+        String[] from = { RemindersDbAdapter.COL_IMPORTANT, RemindersDbAdapter.COL_CONTENT};
         int[] to = { R.id.importantSign,R.id.remindertext};
 
-        SimpleAdapter adapter = new SimpleAdapter(getBaseContext(), aList, R.layout.activity_listview, RemindersList, to);
+        dbAdapter = new RemindersDbAdapter(getBaseContext());
+        dbAdapter.open();
+        Cursor cursor = dbAdapter.fetchAllReminders();
+        cursorAdapter = new RemindersSimpleCursorAdapter(
+                getBaseContext(),
+                R.layout.activity_listview,
+                cursor,
+                from,
+                to,
+                CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER
+        );
 
-        ListView listView = ( ListView ) findViewById(R.id.reminders_list);
-        listView.setAdapter(adapter);
+        ListView listView = findViewById(R.id.reminders_list);
+        listView.setAdapter(cursorAdapter);
 
         registerForContextMenu(listView);
     }
 
-
-
-    //Menu of alert dialoge new reminder and exit
+    //Menu of alert dialog new reminder and exit
     @SuppressLint("ResourceType")
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -111,19 +66,8 @@ public class MainActivity<StableArrayAdapter> extends AppCompatActivity {
             case R.id.newReminderButton:
                 LayoutInflater inflater = getLayoutInflater();
                 View alertLayout = inflater.inflate(R.layout.alertdialoge, null);
-                final EditText newreminder = alertLayout.findViewById(R.id.editReminder);
+                final EditText newReminder = alertLayout.findViewById(R.id.editReminder);
                 final CheckBox important = alertLayout.findViewById(R.id.importantCheckBox);
-
-                important.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        if (isChecked) {
-                            ImageView img=(ImageView)findViewById(R.id.importantSign);
-                            img.setVisibility(View.VISIBLE);
-                             }
-                    }
-                });
 
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
                 alert.setTitle("New Reminder");
@@ -138,8 +82,21 @@ public class MainActivity<StableArrayAdapter> extends AppCompatActivity {
                 alert.setPositiveButton("Commit", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        //We will write code here
-
+                        String reminderText = newReminder.getText().toString();
+                        if (reminderText.isEmpty())
+                        {
+                            Toast.makeText(
+                                    getApplicationContext(),
+                                    "Please enter some text",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                            return;
+                        }
+                        dbAdapter.createReminder(
+                                reminderText,
+                                important.isChecked()
+                        );
+                        cursorAdapter.changeCursor(dbAdapter.fetchAllReminders());
                     }
                 });
                 AlertDialog dialog = alert.create();
@@ -157,7 +114,7 @@ public class MainActivity<StableArrayAdapter> extends AppCompatActivity {
     }
 
 
-    //When click on reminder text meu of edit reminder and delete reminder
+    //When click on reminder text menu of edit reminder and delete reminder
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo)
     {
@@ -166,29 +123,18 @@ public class MainActivity<StableArrayAdapter> extends AppCompatActivity {
         inflater.inflate(R.menu.editmenu, menu);
     }
     @Override
-    public boolean onContextItemSelected(MenuItem itemm){
-        if(itemm.getItemId()==R.id.editButton){
+    public boolean onContextItemSelected(MenuItem item){
+        int reminderID = cursorAdapter.getCursor().getInt(RemindersDbAdapter.INDEX_ID);
+
+        if(item.getItemId()==R.id.editButton){
             LayoutInflater inflater = getLayoutInflater();
             View alertLayout = inflater.inflate(R.layout.alertdialoge, null);
-            final EditText editreminder = alertLayout.findViewById(R.id.editReminder);
+            final EditText editReminder = alertLayout.findViewById(R.id.editReminder);
             final CheckBox important = alertLayout.findViewById(R.id.importantCheckBox);
 
+            final Reminder reminder = dbAdapter.fetchReminderById(reminderID);
+            editReminder.setText(reminder.getContent());
 
-
-            TextView txt_hello = (TextView) findViewById(R.id.remindertext);
-            String reminderr = txt_hello.getText().toString();
-            editreminder.setText(reminderr);
-
-
-            important.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (isChecked) {
-                        ImageView img=(ImageView)findViewById(R.id.importantSign);
-                        img.setVisibility(View.VISIBLE);
-                    }
-                }
-            });
 
             AlertDialog.Builder alert = new AlertDialog.Builder(this);
             alert.setTitle("Edit Reminder");
@@ -205,20 +151,39 @@ public class MainActivity<StableArrayAdapter> extends AppCompatActivity {
             alert.setPositiveButton("Commit", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    // wewill write code here
+                    String reminderText = editReminder.getText().toString();
+                    if (reminderText.isEmpty())
+                    {
+                        Toast.makeText(
+                                getApplicationContext(),
+                                "Please enter some text",
+                                Toast.LENGTH_SHORT
+                        ).show();
+                        return;
+                    }
+                    reminder.setContent(reminderText);
+                    reminder.setImportant(important.isChecked());
+                    dbAdapter.updateReminder(reminder);
+                    cursorAdapter.changeCursor(dbAdapter.fetchAllReminders());
                 }
             });
             AlertDialog dialog = alert.create();
             dialog.show();
             return true;
         }
-        else if(itemm.getItemId()==R.id.deleteButton){
-            Toast.makeText(getApplicationContext(),"sending sms code",Toast.LENGTH_LONG).show();
+        else if(item.getItemId()==R.id.deleteButton){
+            dbAdapter.deleteReminderById(reminderID);
+            cursorAdapter.changeCursor(dbAdapter.fetchAllReminders());
         }else{
             return false;
         }
         return true;
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        dbAdapter.close();
+    }
 }
 

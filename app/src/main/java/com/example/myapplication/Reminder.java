@@ -24,6 +24,10 @@ public class Reminder {
     public int getImportant() {
         return mImportant;
     }
+    public void setImportant(boolean important) {
+        mImportant = important ? 1 : 0;
+    }
+
     public void setImportant(int important) {
         mImportant = important;
     }

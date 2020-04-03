@@ -52,10 +52,11 @@ public class RemindersDbAdapter {
 
 
     // implement the function createReminder() which take the name as the content of the reminder and boolean important...note that the id will be created for you automatically
-    public void createReminder(String content, int important) {
+    public void createReminder(String content, boolean important) {
         ContentValues values = new ContentValues();
         values.put(COL_CONTENT, content);
-        values.put(COL_IMPORTANT, important);
+        int impInt = important ? 1 : 0;
+        values.put(COL_IMPORTANT, impInt);
         mDb.insert(TABLE_NAME, null, values);
     }
     // overloaded to take a reminder
@@ -80,12 +81,11 @@ public class RemindersDbAdapter {
                 null
         );
         cursor.moveToFirst();
-        Reminder reminder = new Reminder(
-                cursor.getLong(0),
-                cursor.getString(1),
-                cursor.getInt(2)
+        return new Reminder(
+                cursor.getLong(INDEX_ID),
+                cursor.getString(INDEX_CONTENT),
+                cursor.getInt(INDEX_IMPORTANT)
         );
-        return  reminder;
     }
 
 
@@ -106,7 +106,6 @@ public class RemindersDbAdapter {
                 COL_ID+"=?",
                 new String[] {String.valueOf(reminder.getId())}
         );
-
     }
     // implement the function deleteReminderById() to delete a certain reminder given its id
     public void deleteReminderById(int nId) {
