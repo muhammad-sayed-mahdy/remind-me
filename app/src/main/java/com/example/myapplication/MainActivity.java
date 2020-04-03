@@ -44,8 +44,8 @@ public class MainActivity extends AppCompatActivity {
         ab.setLogo(R.drawable.icon);
 
 
-        String[] from = {RemindersDbAdapter.COL_IMPORTANT, RemindersDbAdapter.COL_CONTENT};
-        int[] to = {R.id.importantSign, R.id.remindertext};
+        String[] from = {RemindersDbAdapter.COL_CONTENT};
+        int[] to = {R.id.remindertext};
 
         dbAdapter = new RemindersDbAdapter(getBaseContext());
         dbAdapter.open();
