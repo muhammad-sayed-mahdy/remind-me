@@ -6,6 +6,12 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-    </style>
 
+    </style>
+    <style name="MyDialogTheme2" parent="Theme.AppCompat.Light.Dialog.Alert">
+    <item name="android:background">@color/blue</item>
+</style>
+    <style name="MyDialogTheme1" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:background">@color/darkgreen</item>
+    </style>
 </resources>

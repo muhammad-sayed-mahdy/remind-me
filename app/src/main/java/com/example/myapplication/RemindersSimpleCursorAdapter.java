@@ -30,10 +30,11 @@ public class RemindersSimpleCursorAdapter extends SimpleCursorAdapter {
         if (holder == null) {
             holder = new ViewHolder();
             holder.colImp = cursor.getColumnIndexOrThrow(RemindersDbAdapter.COL_IMPORTANT);
-            holder.listTab = view.findViewById(R.id.remindertext);
+            holder.listTab = view.findViewById(R.id.importantSign);
             view.setTag(holder);
         }
         if (cursor.getInt(holder.colImp) > 0) {
+
             holder.listTab.setBackgroundColor(ContextCompat.getColor(context,R.color.orange));
         } else {
             holder.listTab.setBackgroundColor(ContextCompat.getColor(context,R.color.green));
